@@ -138,6 +138,7 @@ try:
     import chromadb
     from chromadb.config import Settings
     chroma_client = chromadb.PersistentClient(path=CHROMA_DIR, settings=Settings(anonymized_telemetry=False))
+    conn.row_factory = sqlite3.Row
     try: chroma_client.delete_collection("scores")
     except: pass
     scol = chroma_client.create_collection("scores")

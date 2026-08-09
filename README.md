@@ -277,12 +277,58 @@ cd /home/BIG/src/DATA/YT
 ./scripts/index_videos.py new_name.txt
 ```
 
-### Checking for updates to an existing playlist
+### Updating an existing playlist
 
 ```bash
-./scripts/fetch_playlist.py --update piano <piano_playlist_id>
-./scripts/index_videos.py piano.txt
+# 1. Fetch only new videos added since last fetch
+./scripts/fetch_playlist.py --update piano PLJtnYnh4N0cvN-201yozJGjgZaZ2gGal4
+./scripts/fetch_playlist.py --update classical PLJtnYnh4N0cstdeQs2rYedL7C9D1v9qd7
+./scripts/fetch_playlist.py --update AI PLJtnYnh4N0ctG-mxLIBXd-Q--qTjyUAJR
+
+# 2. Index new videos (incremental SQLite + Chroma update)
+./scripts/index_videos.py piano.txt classical.txt AI.txt
+
+# 3. Clean dead IDs (deleted/private videos return no metadata)
+python3 - << 'EOF'
+import sqlite3
+conn = sqlite3.connect("/home/BIG/src/DATA/YT/piano.db")
+in_db = set(r[0] for r in conn.execute("SELECT id FROM videos").fetchall())
+conn.close()
+for name in ["piano", "classical", "AI"]:
+    path = f"/home/BIG/src/DATA/YT/{name}.txt"
+    with open(path) as f:
+        ids = [l.strip() for l in f if l.strip()]
+    kept = [v for v in ids if v in in_db]
+    with open(path, "w") as f:
+        f.write("\n".join(kept))
+    print(f"{name}.txt: {len(ids)} -> {len(kept)}")
+EOF
 ```
+
+### Playlist IDs
+
+| Playlist | ID |
+|----------|----|
+| piano | `PLJtnYnh4N0cvN-201yozJGjgZaZ2gGal4` |
+| classical | `PLJtnYnh4N0cstdeQs2rYedL7C9D1v9qd7` |
+| AI | `PLJtnYnh4N0ctG-mxLIBXd-Q--qTjyUAJR` |
+
+### Token refresh (invalid_grant / auth errors)
+
+The Google OAuth refresh token occasionally goes stale (error:
+`invalid_grant: Bad Request`). When the API returns
+`Request had invalid authentication credentials`, run:
+
+```bash
+./scripts/refresh_token.py
+```
+
+This starts a local server on port 5678 and prints an auth URL. Open
+it in your browser, approve the scopes, and the script saves the new
+token to `~/.hermes/google_token.json`. Then retry the update.
+
+Note: port 5678 must be free (the registered redirect URI is
+`http://localhost:5678/rest/oauth2-credential/callback`).
 
 ### Adding new sheet music
 

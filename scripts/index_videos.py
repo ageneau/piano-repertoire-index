@@ -153,6 +153,7 @@ try:
     import chromadb
     from chromadb.config import Settings
     chroma_client = chromadb.PersistentClient(path=CHROMA_DIR, settings=Settings(anonymized_telemetry=False))
+    conn.row_factory = sqlite3.Row  # Ensure dict-like rows
 
     if "--rebuild" in sys.argv:
         # Explicit full rebuild
