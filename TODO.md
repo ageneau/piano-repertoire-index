@@ -31,6 +31,34 @@ into a YouTube playlist.
 Only 2 in DB (Segovia Gavotte from Lute Suite, Feuillâtre BWV 639).
 Find and add more to the classical playlist.
 
+## 7. ModernBERT reranker for cross-modal search
+`match.py` leans on ChromaDB's *default* embedding function and nothing else —
+`all-MiniLM-L6-v2`, 384-dim, no explicit model anywhere in the script. Two
+stages, cheapest first:
+
+1. **Drop-in embedding swap, no training.** Re-index both collections with a
+   ModernBERT embedding model — `nomic-ai/modernbert-embed-base` or
+   `lightonai/modernbert-embed-large` (149M/395M params, 8192 context, Apache
+   2.0). At the current 688 videos + 465 scores (DB and both collections agree),
+   re-embedding is seconds of CPU. Queries must then be embedded with the same
+   model, which means passing an explicit embedding function to match.py instead
+   of accepting the default, plus a re-index of both collections.
+2. **Actual reranking.** Retrieve top-50 with the bi-encoder, then rerank with a
+   ModernBERT cross-encoder — or `lightonai/LateOn`, a ModernBERT late-interaction
+   model — down to top 5. Note ModernBERT is not itself a reranker, it is a
+   backbone you fine-tune into one; the training pairs are free here, because the
+   DB's own catalog columns give query→correct-row pairs (a search for "BWV 846"
+   must retrieve the rows tagged BWV 846).
+
+Build the eval set and record the baseline first: ~30-50 cases of
+query→expected row pulled from the catalog columns, scored on recall@5 and
+recall@10, measured before and after. An unmeasured reranker can demote relevant
+rows out of the window and still look plausible.
+
+Why it is worth doing: retrieval quality *is* this project's product, and the
+two-stage retrieve-then-rerank pattern is the standard way to buy it. No API key,
+no GPU, nothing leaves the box.
+
 ---
 
 ## Done
