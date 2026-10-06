@@ -22,7 +22,7 @@ TUTORIAL = re.compile(
     r'analyse|analysis|workout|warm.up|'
     r'royal\s*conservatory|'
     r'mémoriser|memorize|memorising|conseil|astuce|comment|'
-    r'teachers?\s+and\s+students?)\b', re.IGNORECASE)
+    r'walkthrough|teachers?\s+and\s+students?)\b', re.IGNORECASE)
 PERFORMANCE = re.compile(
     r'\b(plays?|performs?|recital|live|concert|interprète|interprete|joue|interpretation|'
     r'rendition|covers?|version|recording|recorded|performed\s+by|played\s+by|'

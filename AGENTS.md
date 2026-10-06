@@ -62,9 +62,9 @@ cross-modal matching. The heavy data lives OUTSIDE this repo:
 
 ```bash
 cd /home/BIG/src/DATA/YT
-python3 scripts/fetch_playlist.py --update piano PLJtnYnh4N0cvN-201yozJGjgZaZ2gGal4
-python3 scripts/fetch_playlist.py --update classical PLJtnYnh4N0cstdeQs2rYedL7C9D1v9qd7
-python3 scripts/fetch_playlist.py --update AI PLJtnYnh4N0ctG-mxLIBXd-Q--qTjyUAJR
+python3 scripts/fetch_playlist.py --update PLJtnYnh4N0cvN-201yozJGjgZaZ2gGal4 piano
+python3 scripts/fetch_playlist.py --update PLJtnYnh4N0cstdeQs2rYedL7C9D1v9qd7 classical
+python3 scripts/fetch_playlist.py --update PLJtnYnh4N0ctG-mxLIBXd-Q--qTjyUAJR AI
 python3 scripts/index_videos.py piano.txt classical.txt AI.txt
 ```
 

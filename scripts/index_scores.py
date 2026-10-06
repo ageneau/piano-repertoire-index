@@ -51,9 +51,11 @@ def normalize_composer(name):
     return COMPOSER_ALIASES.get(name.strip().lower(), name.strip().title())
 
 conn = sqlite3.connect(DB_PATH)
-conn.execute("DROP TABLE IF EXISTS scores")
+# Do NOT drop the table — that would wipe manual catalog overrides
+# (e.g. sqlite3 UPDATE fixing a missed K.466 or Op.67). Upsert instead,
+# preserving existing non-'unknown' catalog/piece fields.
 conn.execute("""
-    CREATE TABLE scores (
+    CREATE TABLE IF NOT EXISTS scores (
         id INTEGER PRIMARY KEY AUTOINCREMENT, file_path TEXT UNIQUE, filename TEXT,
         composer_dir TEXT, composer TEXT, catalog_type TEXT DEFAULT 'unknown',
         catalog_number TEXT DEFAULT 'unknown', piece_name TEXT DEFAULT 'unknown',
@@ -61,6 +63,11 @@ conn.execute("""
         genre TEXT DEFAULT 'unknown', is_compilation INTEGER DEFAULT 0, source TEXT
     )
 """)
+
+# Load existing rows so manual overrides survive the re-index
+existing = {}
+for row in conn.execute("SELECT file_path, catalog_type, catalog_number, piece_type FROM scores"):
+    existing[row[0]] = {"catalog_type": row[1], "catalog_number": row[2], "piece_type": row[3]}
 
 genre_map = {"jazz": "jazz", "films": "film", "musique_religieuse": "sacred",
              "ragtime": "ragtime", "solfege": "solfege"}
@@ -101,11 +108,33 @@ for root, dirs, files in os.walk(BASE):
         scores.append((fp, f, composer_dir, composer, cat_type, cat_num, "unknown",
                        piece_type, arranger, genre, is_comp, rel))
 
+# Merge: keep existing (possibly manual) catalog/piece values when non-'unknown'
+rows = []
+for fp, f, composer_dir, composer, cat_type, cat_num, piece_name, piece_type, arranger, genre, is_comp, rel in scores:
+    prev = existing.get(fp)
+    if prev:
+        if prev["catalog_type"] != "unknown":
+            cat_type = prev["catalog_type"]
+            cat_num = prev["catalog_number"]
+        if prev["piece_type"] != "unknown":
+            piece_type = prev["piece_type"]
+    rows.append((fp, f, composer_dir, composer, cat_type, cat_num, piece_name,
+                 piece_type, arranger, genre, is_comp, rel))
+
 conn.executemany("INSERT OR REPLACE INTO scores (file_path, filename, composer_dir, composer, "
     "catalog_type, catalog_number, piece_name, piece_type, arranger, genre, is_compilation, source) "
-    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", scores)
+    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", rows)
+
+# Delete rows whose file no longer exists on disk (removed/renamed scores)
+on_disk = [r[0] for r in rows]
+if on_disk:
+    conn.execute("CREATE TEMP TABLE IF NOT EXISTS tmp_ondisk (fp TEXT PRIMARY KEY)")
+    conn.execute("DELETE FROM tmp_ondisk")
+    conn.executemany("INSERT OR IGNORE INTO tmp_ondisk (fp) VALUES (?)", [(p,) for p in on_disk])
+    conn.execute("DELETE FROM scores WHERE file_path NOT IN (SELECT fp FROM tmp_ondisk)")
+
 conn.commit()
-print(f"Indexed {len(scores)} scores from filesystem")
+print(f"Indexed {len(rows)} scores from filesystem")
 
 # ── OCR pass ─────────────────────────────────────────────────────────
 if "--quick" not in sys.argv:
