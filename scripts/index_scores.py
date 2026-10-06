@@ -10,7 +10,7 @@ import sqlite3, re, os, sys, json, io, pymupdf, pytesseract
 from PIL import Image
 
 BASE = os.path.expanduser("~/Documents/Piano/Partitions")
-DB_PATH = "/home/BIG/src/DATA/YT/piano.db"
+DB_PATH = os.path.expanduser("~/.local/share/piano-repertoire-index/piano.db")
 CHROMA_DIR = os.path.expanduser("~/.local/share/chroma")
 
 # ── Patterns ─────────────────────────────────────────────────────────

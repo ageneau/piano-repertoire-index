@@ -8,10 +8,11 @@ Usage:
 """
 import json, requests, time, sqlite3, re, os, sys, glob
 
+REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TOKEN_PATH = os.path.expanduser("~/.hermes/google_token.json")
-DB_PATH = "/home/BIG/src/DATA/YT/piano.db"
+DB_PATH = os.path.expanduser("~/.local/share/piano-repertoire-index/piano.db")
 CHROMA_DIR = os.path.expanduser("~/.local/share/chroma")
-DATA_DIR = "/home/BIG/src/DATA/YT"
+DATA_DIR = REPO_DIR
 
 # ── Classification patterns ──────────────────────────────────────────
 TUTORIAL = re.compile(

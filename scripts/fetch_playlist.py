@@ -8,7 +8,7 @@ Usage:
 import json, requests, time, os, sys
 
 TOKEN_PATH = os.path.expanduser("~/.hermes/google_token.json")
-OUT_DIR = "/home/BIG/src/DATA/YT"
+OUT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 update_mode = "--update" in sys.argv
 args = [a for a in sys.argv[1:] if not a.startswith("--")]

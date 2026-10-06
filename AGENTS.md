@@ -8,18 +8,17 @@ Index of piano repertoire: YouTube videos (playlists) and local sheet music
 scores, with metadata extraction (composer, catalog numbers) and
 cross-modal matching. The heavy data lives OUTSIDE this repo:
 
-- SQLite DB: `/home/BIG/src/DATA/YT/piano.db` (not fully in git — only
-  committed occasionally as a snapshot)
+- SQLite DB: `~/.local/share/piano-repertoire-index/piano.db` (on the home
+  user's disk, NOT in git)
 - ChromaDB vectors: `~/.local/share/chroma/` (user home = `/home/sylvain`,
   NOT in git)
 - Scores: `~/Documents/Piano/Partitions/` (~463 PDFs, composer dirs)
-- Video ID files: `piano.txt`, `classical.txt`, `AI.txt` (in git)
+- Video ID files: `piano.txt`, `classical.txt`, `AI.txt` (repo root, gitignored)
 
 ## Layout
 
 ```
-/home/BIG/src/DATA/YT/
-  piano.db          SQLite: videos + scores tables
+/home/BIG/src/AI/piano-repertoire-index/
   piano.txt         video IDs from "piano" YouTube playlist
   classical.txt     video IDs from "classical" playlist
   AI.txt            video IDs from "AI" playlist
@@ -35,8 +34,9 @@ cross-modal matching. The heavy data lives OUTSIDE this repo:
 
 ## Key facts
 
-- **Path split**: repo root is `/home/BIG/src/DATA/YT` but `~` = `/home/sylvain`.
-  Use absolute paths in scripts; do not assume `~` == repo-adjacent.
+- **Path split**: repo root is `/home/BIG/src/AI/piano-repertoire-index` but
+  `~` = `/home/sylvain`. Use absolute paths in scripts; do not assume
+  `~` == repo-adjacent. Scripts derive the repo root from `__file__`.
 - **Google OAuth**: token `~/.hermes/google_token.json`, client secret
   `~/.hermes/google_client_secret.json`. Redirect URI:
   `http://localhost:5678/rest/oauth2-credential/callback` — port 5678 must
@@ -61,7 +61,7 @@ cross-modal matching. The heavy data lives OUTSIDE this repo:
 ### Update all playlists (recurring task)
 
 ```bash
-cd /home/BIG/src/DATA/YT
+cd /home/BIG/src/AI/piano-repertoire-index
 python3 scripts/fetch_playlist.py --update PLJtnYnh4N0cvN-201yozJGjgZaZ2gGal4 piano
 python3 scripts/fetch_playlist.py --update PLJtnYnh4N0cstdeQs2rYedL7C9D1v9qd7 classical
 python3 scripts/fetch_playlist.py --update PLJtnYnh4N0ctG-mxLIBXd-Q--qTjyUAJR AI
@@ -94,6 +94,6 @@ regex misses some variants (`K466`, `MazurkasOp7`) — fix with a manual
 
 - Repo on GitHub: `git@github.com:ageneau/piano-repertoire-index.git`
 - `.gitignore` excludes pre-existing channel dirs (`@*`), subscription
-  exports, playlist .txt churn is committed.
-- `piano.db` is a committed snapshot; refresh/commit occasionally but it
-  changes on every index run.
+  exports, the playlist `.txt` files, and the local `piano.db`.
+- `piano.db` lives at `~/.local/share/piano-repertoire-index/piano.db` and
+  is NOT tracked in git.

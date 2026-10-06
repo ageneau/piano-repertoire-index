@@ -1,3 +1,7 @@
+# Local database (lives in ~/.local/share/piano-repertoire-index/)
+/piano.db
+__pycache__/
+
 # Pre-existing files — not part of the index
 /@AnotherMaker/
 /@Antune/

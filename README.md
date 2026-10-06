@@ -22,7 +22,7 @@ Piano/Partitions/ →  index_scores  →      score filenames + metadata
                          (cross-modal search)
 ```
 
-## Database — `/home/BIG/src/DATA/YT/piano.db`
+## Database — `~/.local/share/piano-repertoire-index/piano.db`
 
 Single SQLite file, two tables, no relations between them. Matching
 is done via ChromaDB vectors, not SQL joins.
@@ -106,7 +106,7 @@ Two collections for vector similarity search. Default embedding model:
 ## Playlists
 
 ```
-/home/BIG/src/DATA/YT/
+/home/BIG/src/AI/piano-repertoire-index/
   piano.txt      432 IDs   (main piano playlist)
   classical.txt  161 IDs
   AI.txt          61 IDs
@@ -116,7 +116,7 @@ Each file: one YouTube video ID per line, no headers.
 
 ## Scripts
 
-All in `/home/BIG/src/DATA/YT/scripts/`. Run from the YT directory.
+All in `scripts/`. Run from the repo root.
 
 ### `fetch_playlist.py`
 
@@ -153,7 +153,7 @@ Examples:
       → Incremental Chroma update (only new entries)
 
   index_videos.py --all
-      → Scan all .txt files in the YT directory
+      → Scan all .txt files in the repo root
       → Same incremental logic per file
 
   index_videos.py --rebuild
@@ -162,7 +162,7 @@ Examples:
       → Use after modifying classifications or adding metadata
 
 Flags:
-  --all       Process all .txt files in the YT directory
+  --all       Process all .txt files in the repo root
   --rebuild   Rebuild ChromaDB from scratch (no API calls)
 
 How it works:
@@ -272,7 +272,7 @@ filenames (with underscores/hyphens normalized to spaces).
 ### Adding a new playlist
 
 ```bash
-cd /home/BIG/src/DATA/YT
+cd /home/BIG/src/AI/piano-repertoire-index
 ./scripts/fetch_playlist.py PL_xyz_new_playlist new_name
 ./scripts/index_videos.py new_name.txt
 ```
@@ -290,12 +290,12 @@ cd /home/BIG/src/DATA/YT
 
 # 3. Clean dead IDs (deleted/private videos return no metadata)
 python3 - << 'EOF'
-import sqlite3
-conn = sqlite3.connect("/home/BIG/src/DATA/YT/piano.db")
+import os, sqlite3
+conn = sqlite3.connect(os.path.expanduser("~/.local/share/piano-repertoire-index/piano.db"))
 in_db = set(r[0] for r in conn.execute("SELECT id FROM videos").fetchall())
 conn.close()
 for name in ["piano", "classical", "AI"]:
-    path = f"/home/BIG/src/DATA/YT/{name}.txt"
+    path = f"/home/BIG/src/AI/piano-repertoire-index/{name}.txt"
     with open(path) as f:
         ids = [l.strip() for l in f if l.strip()]
     kept = [v for v in ids if v in in_db]
@@ -379,8 +379,7 @@ Note: port 5678 must be free (the registered redirect URI is
 ## File Layout
 
 ```
-/home/BIG/src/DATA/YT/
-  piano.db               SQLite database
+/home/BIG/src/AI/piano-repertoire-index/
   piano.txt              Video IDs (piano playlist)
   classical.txt          Video IDs
   AI.txt                 Video IDs
@@ -390,6 +389,9 @@ Note: port 5678 must be free (the registered redirect URI is
     index_videos.py      Metadata → SQLite + Chroma
     index_scores.py      Scores → SQLite + Chroma
     match.py             Cross-modal search
+
+~/.local/share/piano-repertoire-index/
+  piano.db               SQLite database
 
 ~/.local/share/chroma/   ChromaDB persistent storage
   chroma.sqlite3         Vector index data
