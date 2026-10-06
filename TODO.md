@@ -59,6 +59,13 @@ Why it is worth doing: retrieval quality *is* this project's product, and the
 two-stage retrieve-then-rerank pattern is the standard way to buy it. No API key,
 no GPU, nothing leaves the box.
 
+## 8. Metadata for the flat `Partitions/pdf/` folder
+All 465 PDFs are indexed, but 257 sit directly in `~/Documents/Piano/Partitions/pdf/`
+with no composer directory, so `composer` is parsed as `Pdf` and catalog stays
+`unknown`. Result: those rows can't match on composer/catalog. Options: sort the
+files into composer dirs, or infer composer from filename/OCR and write overrides
+(now safe — `index_scores.py` no longer drops the table).
+
 ---
 
 ## Done
