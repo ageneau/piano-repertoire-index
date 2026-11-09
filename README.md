@@ -71,7 +71,22 @@ Two collections for vector similarity search. Default embedding model:
 `all-MiniLM-L6-v2` (downloaded on first use, ~80MB cache at
 `~/.cache/chroma/`).
 
-### `videos` collection (424 entries)
+### Installing ChromaDB
+
+The scripts use ChromaDB in-process (`chromadb.PersistentClient`), not a
+server or container. Install the Python package with `uv`:
+
+```bash
+uv pip install --python /usr/bin/python3.14 \
+  --target /home/sylvain/.local/lib/python3.14/site-packages chromadb
+```
+
+System-wide install (`uv pip install --system`) fails on this machine:
+`/usr` is externally managed and there is no passwordless sudo. Installing
+into the user site (already on `sys.path`) keeps plain `python3` working.
+A Podman image (`docker.io/chromadb/chroma`) is not used.
+
+### `videos` collection (730 entries)
 
 | Field | Content |
 |-------|---------|
@@ -84,7 +99,7 @@ Two collections for vector similarity search. Default embedding model:
 | metadata.classification | tutorial/performance/etc |
 | metadata.url | `https://youtu.be/{id}` |
 
-### `scores` collection (458 entries)
+### `scores` collection (468 entries)
 
 | Field | Content |
 |-------|---------|
@@ -107,9 +122,9 @@ Two collections for vector similarity search. Default embedding model:
 
 ```
 /home/BIG/src/AI/piano-repertoire-index/
-  piano.txt      432 IDs   (main piano playlist)
-  classical.txt  161 IDs
-  AI.txt          61 IDs
+  piano.txt      460 IDs   (main piano playlist)
+  classical.txt  189 IDs
+  AI.txt          90 IDs
 ```
 
 Each file: one YouTube video ID per line, no headers.
@@ -396,7 +411,7 @@ Note: port 5678 must be free (the registered redirect URI is
 ~/.local/share/chroma/   ChromaDB persistent storage
   chroma.sqlite3         Vector index data
 
-~/Documents/Piano/Partitions/    458 PDFs
+~/Documents/Piano/Partitions/    468 PDFs
   J.S. Bach/           41 files
   Chopin/              12 files
   Schumann/            10 files

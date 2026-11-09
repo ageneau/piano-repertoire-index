@@ -85,8 +85,21 @@ regex misses some variants (`K466`, `MazurkasOp7`) — fix with a manual
 
 ## Environment
 
-- Python via `uv` (system installs: `uv pip install --system <pkg>`)
-- No venv. Scripts run with plain `python3`.
+- Python via `uv`. No venv; scripts run with plain `python3`.
+- `uv pip install --system <pkg>` fails: `/usr` is externally managed and
+  there is no passwordless sudo. Install into the user site instead (it is
+  already on `sys.path`):
+
+  ```bash
+  uv pip install --python /usr/bin/python3.14 \
+    --target /home/sylvain/.local/lib/python3.14/site-packages <pkg>
+  ```
+
+  Always pass `--python`; without it `uv` may resolve wheels for its own
+  default interpreter (e.g. cp312 extensions installed under 3.14).
+- ChromaDB runs in-process (`PersistentClient`), not as a server/container.
+  Install the `chromadb` package with the command above; the pulled
+  `docker.io/chromadb/chroma` Podman image is not used.
 - Google API access via `requests` + OAuth token file.
 - Do not print or commit tokens/keys.
 
