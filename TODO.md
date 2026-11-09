@@ -66,6 +66,12 @@ with no composer directory, so `composer` is parsed as `Pdf` and catalog stays
 files into composer dirs, or infer composer from filename/OCR and write overrides
 (now safe — `index_scores.py` no longer drops the table).
 
+## 9. ABRSM all-pieces roundups: index each piece
+ABRSM booklets are indexed as one video, so individual pieces (e.g.
+Tchaikovsky Op. 39 "La nouvelle poupée") don't surface on their own.
+Expand each roundup into one row per piece, or link them via a
+`video_pieces` table.
+
 ---
 
 ## Done
